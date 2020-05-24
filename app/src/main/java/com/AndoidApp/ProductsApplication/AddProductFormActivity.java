@@ -34,7 +34,7 @@ public class AddProductFormActivity extends AppCompatActivity {
     private Uri imageUri;
     private ImageView imageView;
 
-    private Button addProduct, chooseImg, add;
+    private Button addProduct, chooseImg;
     private EditText denumire, cantitate, pret, categorie;
 
     private StorageReference storageref;
@@ -51,7 +51,6 @@ public class AddProductFormActivity extends AppCompatActivity {
         addProduct = findViewById(R.id.AddProduct);
         chooseImg = findViewById(R.id.chooseImg);
         imageView = findViewById(R.id.ImgView);
-        add = findViewById(R.id.add);
 
         storageref= FirebaseStorage.getInstance().getReference("uploads");
         frb = FirebaseDatabase.getInstance();
@@ -77,10 +76,10 @@ public class AddProductFormActivity extends AppCompatActivity {
                 else if(pretxt.isEmpty())pret.setError("Camp obligatoriu");
                 else if(categtxt.isEmpty())categorie.setError("Camp obligatoriu");
                 else{
-                    Produs obj = new Produs(dentxt, cantxt, pretxt, categtxt);
+                    Produs obj = new Produs(dentxt, cantxt, pretxt, categtxt, "");
                     dbref= FirebaseDatabase.getInstance().getReference().child("Prods").child(dentxt);
                     dbref.setValue(obj);
-                    Toast.makeText(AddProductFormActivity.this, "Adaugat cu succes", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddProductFormActivity.this, "Adaugat cu succes", Toast.LENGTH_SHORT).show();
                     Uploadfile(dentxt);
 
                 }
@@ -92,12 +91,6 @@ public class AddProductFormActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 OpenFileChooser();
-            }
-        });
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uploadfile("file1");
             }
         });
     }
@@ -114,7 +107,6 @@ public class AddProductFormActivity extends AppCompatActivity {
 
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageUri = data.getData();
-
             Picasso.with(this).load(imageUri).into(imageView);
         }
     }
@@ -127,26 +119,33 @@ public class AddProductFormActivity extends AppCompatActivity {
 
     private void Uploadfile(final String str){
         if(imageUri != null){
-            Log.i("Location", str +"."+ getExtention(imageUri));
-            Log.i("File", imageUri.toString());
-            StorageReference fileref = storageref.child(str +"."+ getExtention(imageUri));
+            final StorageReference fileref = storageref.child(str +"."+ getExtention(imageUri));
 
             fileref.putFile(imageUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Toast.makeText(AddProductFormActivity.this, "Incarcare reusita",Toast.LENGTH_LONG).show();
-                            //dbref.child(str).child("imgUrl").setValue(taskSnapshot.getStorage().getDownloadUrl().toString());
+                            Toast.makeText(AddProductFormActivity.this, "Incarcare reusita",Toast.LENGTH_SHORT).show();
+                            fileref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    dbref= FirebaseDatabase.getInstance().getReference().child("Prods").child(str).child("imageUrl");
+                                    dbref.setValue(uri.toString());
+                                    Intent intent = new Intent(AddProductFormActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+                            });
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(AddProductFormActivity.this, "Incarcare nereusita" + e,Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddProductFormActivity.this, "Incarcare nereusita" + e,Toast.LENGTH_SHORT).show();
                         }
                     });
         } else {
             Toast.makeText(this, "Alegeti o imagine",Toast.LENGTH_LONG).show();
         }
     }
+
 }

@@ -39,20 +39,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler);
         dbref = FirebaseDatabase.getInstance().getReference().child("Prods");
 
-        final Produs obj1 = new Produs("Den1", "20", "20", "Fructe");
         dbref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    String denumire, cantitate, categorie, pret;
-                    denumire = ds.child("denumire").getValue().toString();
-                    cantitate = ds.child("cantitate").getValue().toString();
-                    categorie = ds.child("categorie").getValue().toString();
-                    pret = ds.child("pret").getValue().toString();
-
-                    Produs obj = new Produs(denumire, cantitate, pret, categorie);
+                    Produs obj = ds.getValue(Produs.class);
                     produse.add(obj);
-
                 }
                 recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                 adapter = new Adapter(MainActivity.this, produse);

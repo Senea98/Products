@@ -125,15 +125,6 @@
 
     </Button>
 
-    <Button
-        android:id="@+id/add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="+img"
-        app:layout_constraintEnd_toStartOf="@+id/AddProduct"
-        app:layout_constraintStart_toEndOf="@+id/chooseImg"
-        app:layout_constraintTop_toTopOf="@+id/AddProduct" />
-
     <ImageView
         android:id="@+id/ImgView"
         android:layout_width="300dp"
