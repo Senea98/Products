@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
@@ -33,7 +34,7 @@ public class AddProductFormActivity extends AppCompatActivity {
     private Uri imageUri;
     private ImageView imageView;
 
-    private Button addProduct, chooseImg;
+    private Button addProduct, chooseImg, add;
     private EditText denumire, cantitate, pret, categorie;
 
     private StorageReference storageref;
@@ -45,13 +46,15 @@ public class AddProductFormActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product_form);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         addProduct = findViewById(R.id.AddProduct);
         chooseImg = findViewById(R.id.chooseImg);
         imageView = findViewById(R.id.ImgView);
+        add = findViewById(R.id.add);
 
-//        storageref= FirebaseStorage.getInstance().getReference("uploads");
-//        frb = FirebaseDatabase.getInstance();
+        storageref= FirebaseStorage.getInstance().getReference("uploads");
+        frb = FirebaseDatabase.getInstance();
         dbref = frb.getReference("Prods");
 
         addProduct.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +80,8 @@ public class AddProductFormActivity extends AppCompatActivity {
                     Produs obj = new Produs(dentxt, cantxt, pretxt, categtxt);
                     dbref= FirebaseDatabase.getInstance().getReference().child("Prods").child(dentxt);
                     dbref.setValue(obj);
-                    //Uploadfile(dentxt);
+                    Toast.makeText(AddProductFormActivity.this, "Adaugat cu succes", Toast.LENGTH_LONG).show();
+                    Uploadfile(dentxt);
 
                 }
 
@@ -88,6 +92,12 @@ public class AddProductFormActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 OpenFileChooser();
+            }
+        });
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uploadfile("file1");
             }
         });
     }
@@ -109,32 +119,34 @@ public class AddProductFormActivity extends AppCompatActivity {
         }
     }
 
-//    private String getExtention(Uri uri){
-//        ContentResolver cR = getContentResolver();
-//        MimeTypeMap mime =MimeTypeMap.getSingleton();
-//        return mime.getExtensionFromMimeType(cR.getType(uri));
-//    }
-//
-//    private void Uploadfile(final String str){
-//        if(imageUri != null){
-//            StorageReference fileref = storageref.child(str + getExtention(imageUri));
-//
-//            fileref.putFile(imageUri)
-//                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                        @Override
-//                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                            Toast.makeText(AddProductFormActivity.this, "Incarcare reusita",Toast.LENGTH_LONG).show();
-//                            //dbref.child(str).child("imgUrl").setValue(taskSnapshot.getStorage().getDownloadUrl().toString());
-//                        }
-//                    })
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            Toast.makeText(AddProductFormActivity.this, "Incarcare nereusita" + e,Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//        } else {
-//            Toast.makeText(this, "Alegeti o imagine",Toast.LENGTH_LONG).show();
-//        }
-//    }
+    private String getExtention(Uri uri){
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime =MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+
+    private void Uploadfile(final String str){
+        if(imageUri != null){
+            Log.i("Location", str +"."+ getExtention(imageUri));
+            Log.i("File", imageUri.toString());
+            StorageReference fileref = storageref.child(str +"."+ getExtention(imageUri));
+
+            fileref.putFile(imageUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(AddProductFormActivity.this, "Incarcare reusita",Toast.LENGTH_LONG).show();
+                            //dbref.child(str).child("imgUrl").setValue(taskSnapshot.getStorage().getDownloadUrl().toString());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(AddProductFormActivity.this, "Incarcare nereusita" + e,Toast.LENGTH_LONG).show();
+                        }
+                    });
+        } else {
+            Toast.makeText(this, "Alegeti o imagine",Toast.LENGTH_LONG).show();
+        }
+    }
 }

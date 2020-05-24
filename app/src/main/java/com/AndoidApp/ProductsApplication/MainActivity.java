@@ -39,39 +39,31 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycler);
         dbref = FirebaseDatabase.getInstance().getReference().child("Prods");
 
-//        ValueEventListener eventListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-//                    String denumire, cantitate, categorie, pret;
-//                    denumire = ds.child("denumire").getValue().toString();
-//                    cantitate = ds.child("cantitate").getValue().toString();
-//                    categorie = ds.child("categorie").getValue().toString();
-//                    pret = ds.child("pret").getValue().toString();
-//
-//                    Produs obj = new Produs(denumire, cantitate, pret, categorie);
-//                    produse.add(obj);
-//                }
-//
-//                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-//                adapter = new Adapter(MainActivity.this, produse);
-//                recyclerView.setAdapter(adapter);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        };
-//        dbref.addListenerForSingleValueEvent(eventListener);
+        final Produs obj1 = new Produs("Den1", "20", "20", "Fructe");
+        dbref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    String denumire, cantitate, categorie, pret;
+                    denumire = ds.child("denumire").getValue().toString();
+                    cantitate = ds.child("cantitate").getValue().toString();
+                    categorie = ds.child("categorie").getValue().toString();
+                    pret = ds.child("pret").getValue().toString();
 
-        Produs obj1 = new Produs("Den1", "20", "20", "Fructe");
-        Produs obj2 = new Produs("Den2", "20", "40", "Fructe");
-        Produs obj3 = new Produs("Den3", "20", "20", "Legume");
-        produse.add(obj1); produse.add(obj2);produse.add(obj3);produse.add(obj3);
-        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        adapter = new Adapter(MainActivity.this, produse);
-        recyclerView.setAdapter(adapter);
+                    Produs obj = new Produs(denumire, cantitate, pret, categorie);
+                    produse.add(obj);
+
+                }
+                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                adapter = new Adapter(MainActivity.this, produse);
+                recyclerView.setAdapter(adapter);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
     public void openAddProduct(){
         Intent intent = new Intent(this, AddProductFormActivity.class);
